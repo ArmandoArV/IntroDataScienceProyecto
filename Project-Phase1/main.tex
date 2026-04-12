@@ -94,6 +94,12 @@
 \usepackage[style=apa, backend=biber]{biblatex}
 \addbibresource{references.bib}
 
+%% Forzar que el encabezado de bibliografía use formato APA Nivel 1
+\defbibheading{bibintoc}[\refname]{%
+  \newpage
+  \section{#1}%
+}
+
 % ===============================================================
 \begin{document}
 
@@ -102,7 +108,7 @@
 %% ============================
 \begin{titlepage}
   \centering
-  \thispagestyle{empty}
+  \setcounter{page}{1}
   \vspace*{1.5cm}
 
   \includegraphics[width=0.35\textwidth]{../Assets/Logo.png}
@@ -136,8 +142,23 @@
 \end{titlepage}
 
 %% ============================
+%% RESUMEN (Abstract)
+%% ============================
+\newpage
+\section{Resumen}
+
+Este trabajo presenta un análisis cuantitativo de los precios minoristas de combustibles a nivel global durante el período 2020--2026, utilizando exclusivamente el dataset de Kaggle ``Global Fuel Prices 2020--2026''. A partir de 27\,468 observaciones semanales de 84 países, se busca caracterizar los niveles y la volatilidad de los precios de gasolina, diésel y GLP, identificar patrones por región, nivel de ingreso y grado de subsidios, y evaluar la transmisión del precio internacional del crudo al consumidor final. El estudio emplea métricas descriptivas, pruebas estadísticas sencillas y modelos predictivos (regresiones lineales y árboles de decisión) para responder a preguntas de investigación específicas. Los resultados pueden aportar evidencia útil para el diseño de políticas energéticas, subsidios focalizados y estrategias de protección de hogares vulnerables frente a shocks de precios.
+
+\textit{Palabras clave}: precios de combustibles, volatilidad, subsidios energéticos, análisis comparativo, datos de Kaggle
+
+%% ============================
 %% CONTENIDO
 %% ============================
+
+\newpage
+\begin{center}
+  {\normalsize\bfseries Análisis Global de Precios de Combustibles 2020--2026}
+\end{center}
 
 % -------------------------------------------------
 \section{Contexto y motivación}
@@ -257,6 +278,6 @@ Elaborar visualizaciones comparativas (mapas de calor, gráficos de líneas, box
 % -------------------------------------------------
 \nocite{kilian2008}
 \newpage
-\printbibliography[title=Referencias]
+\printbibliography[heading=bibintoc, title=Referencias]
 
 \end{document}
