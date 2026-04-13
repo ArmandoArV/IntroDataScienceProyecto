@@ -1,164 +1,47 @@
 % ==============================================================
 % Análisis Global de Precios de Combustibles 2020–2026
-% Formato: APA 7.ª edición — Compilar con pdfLaTeX + Biber
+% Formato: APA 7.ª edición (clase apa7) — Compilar con pdfLaTeX + Biber
 % ==============================================================
-\documentclass[12pt, a4paper]{article}
+\documentclass[stu, 12pt, a4paper, biblatex, donotrepeattitle]{apa7}
 
 %% ============================
 %% Codificación y lenguaje
 %% ============================
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[spanish,es-nolayout]{babel}
-\usepackage{caption}
+\usepackage[spanish]{babel}
 
 %% ============================
-%% Tipografía APA 7 (Times New Roman)
-%% ============================
-\usepackage{mathptmx}
-
-%% ============================
-%% Espaciado doble (APA 7)
-%% ============================
-\usepackage{setspace}
-\doublespacing
-
-%% ============================
-%% Márgenes 1 pulgada (APA 7)
-%% ============================
-\usepackage[margin=2.54cm, headheight=14.5pt]{geometry}
-
-%% ============================
-%% Encabezados y pies de página
-%% ============================
-\usepackage{fancyhdr}
-\pagestyle{fancy}
-\fancyhf{}
-\rhead{\thepage}
-\renewcommand{\headrulewidth}{0pt}
-
-%% ============================
-%% Gráficos
+%% Paquetes adicionales
 %% ============================
 \usepackage{graphicx}
-
-%% ============================
-%% Títulos de secciones (APA 7)
-%% Nivel 1: centrado, negrita
-%% Nivel 2: alineado izquierda, negrita
-%% Nivel 3: alineado izquierda, negrita cursiva
-%% ============================
-\usepackage{titlesec}
-
-\titleformat{\section}
-  {\normalfont\normalsize\bfseries\centering}
-  {}{0em}{}
-\titlespacing*{\section}{0pt}{12pt}{12pt}
-
-\titleformat{\subsection}
-  {\normalfont\normalsize\bfseries}
-  {}{0em}{}
-\titlespacing*{\subsection}{0pt}{12pt}{12pt}
-
-\titleformat{\subsubsection}
-  {\normalfont\normalsize\bfseries\itshape}
-  {}{0em}{}
-\titlespacing*{\subsubsection}{0pt}{12pt}{12pt}
-
-%% ============================
-%% Sangría de párrafos (APA 7: 0,5 in = 1,27 cm)
-%% ============================
-\setlength{\parindent}{1.27cm}
-\setlength{\parskip}{0pt}
-
-%% ============================
-%% Listas
-%% ============================
 \usepackage{enumitem}
-
-%% ============================
-%% Hipervínculos
-%% ============================
-\usepackage{hyperref}
-\hypersetup{
-  colorlinks  = true,
-  linkcolor   = black,
-  citecolor   = black,
-  urlcolor    = blue
-}
-
-%% ============================
-%% Bibliografía APA 7
-%% ============================
 \usepackage{csquotes}
-\usepackage[style=apa, backend=biber]{biblatex}
+
+%% ============================
+%% Bibliografía (gestionada por apa7 con biblatex)
+%% ============================
 \addbibresource{references.bib}
 
-%% Forzar que el encabezado de bibliografía use formato APA Nivel 1
-\defbibheading{bibintoc}[\refname]{%
-  \newpage
-  \section{#1}%
-}
+%% ============================
+%% Metadatos APA 7 (modo estudiante)
+%% ============================
+\title{Análisis Global de Precios de Combustibles 2020--2026}
+\author{Armando Arredondo, Bastián Hernández, Francisco Nahamias, Eduardo Albornoz}
+\affiliation{Pontificia Universidad Católica de Chile}
+\course{IMT-3860: Introducción a Data Science}
+\professor{Alejandro Cataldo}
+\duedate{Abril 2026}
+
+\abstract{Este trabajo presenta un análisis cuantitativo de los precios minoristas de combustibles a nivel global durante el período 2020--2026, utilizando exclusivamente el dataset de Kaggle ``Global Fuel Prices 2020--2026''. A partir de 27\,468 observaciones semanales de 84 países, se busca caracterizar los niveles y la volatilidad de los precios de gasolina, diésel y GLP, identificar patrones por región, nivel de ingreso y grado de subsidios, y evaluar la transmisión del precio internacional del crudo al consumidor final. El estudio emplea métricas descriptivas, pruebas estadísticas sencillas y modelos predictivos (regresiones lineales y árboles de decisión) para responder a preguntas de investigación específicas. Los resultados pueden aportar evidencia útil para el diseño de políticas energéticas, subsidios focalizados y estrategias de protección de hogares vulnerables frente a shocks de precios.}
+
+\keywords{precios de combustibles, volatilidad, subsidios energéticos, análisis comparativo, datos de Kaggle}
 
 % ===============================================================
 \begin{document}
 
-%% ============================
-%% PORTADA
-%% ============================
-\begin{titlepage}
-  \centering
-  \setcounter{page}{1}
-  \vspace*{1.5cm}
-
-  \includegraphics[width=0.35\textwidth]{../Assets/Logo.png}
-
-  \vspace{1.2cm}
-
-  {\Large\bfseries Pontificia Universidad Católica de Chile}\\[0.4cm]
-
-  \vspace{2.5cm}
-
-  {\LARGE\bfseries Análisis Global de Precios de Combustibles 2020--2026}
-
-  \vspace{2.5cm}
-
-  {\large
-    Armando Arredondo\\[0.2cm]
-    Bastián Hernández\\[0.2cm]
-    Francisco Nahamias\\[0.2cm]
-    Eduardo Albornoz%
-  }
-
-  \vspace{2cm}
-
-  {\large IMT-3860: Introducción a Data Science}\\[0.3cm]
-  {\large Docente: Alejandro Cataldo}
-
-  \vfill
-
-  {\large Abril 2026}
-
-\end{titlepage}
-
-%% ============================
-%% RESUMEN (Abstract)
-%% ============================
-\newpage
-\section{Resumen}
-
-Este trabajo presenta un análisis cuantitativo de los precios minoristas de combustibles a nivel global durante el período 2020--2026, utilizando exclusivamente el dataset de Kaggle ``Global Fuel Prices 2020--2026''. A partir de 27\,468 observaciones semanales de 84 países, se busca caracterizar los niveles y la volatilidad de los precios de gasolina, diésel y GLP, identificar patrones por región, nivel de ingreso y grado de subsidios, y evaluar la transmisión del precio internacional del crudo al consumidor final. El estudio emplea métricas descriptivas, pruebas estadísticas sencillas y modelos predictivos (regresiones lineales y árboles de decisión) para responder a preguntas de investigación específicas. Los resultados pueden aportar evidencia útil para el diseño de políticas energéticas, subsidios focalizados y estrategias de protección de hogares vulnerables frente a shocks de precios.
-
-\textit{Palabras clave}: precios de combustibles, volatilidad, subsidios energéticos, análisis comparativo, datos de Kaggle
-
-%% ============================
-%% CONTENIDO
-%% ============================
-
-\newpage
-\begin{center}
-  {\normalsize\bfseries Análisis Global de Precios de Combustibles 2020--2026}
-\end{center}
+%% Genera portada APA 7 (modo estudiante) + resumen + título en primera página
+\maketitle
 
 % -------------------------------------------------
 \section{Contexto y motivación}
@@ -184,7 +67,7 @@ Realizar un análisis cuantitativo utilizando exclusivamente el dataset de Kaggl
 
 \subsection{Objetivos específicos}
 
-\begin{enumerate}[leftmargin=1.27cm]
+\begin{enumerate}
   \item Describir cómo evolucionaron, según el dataset, los precios de la gasolina, el diésel y el GLP entre 2020 y 2026 en los 84 países; identificar tendencias globales y regionales, así como episodios definidos de volatilidad extrema.
 
   \item Comparar los niveles promedio y la volatilidad de precios entre grupos de países clasificados por nivel de ingreso (alto, medio, bajo) y por nivel de subsidios (\textit{subsidy\_level}), utilizando métricas descriptivas y pruebas estadísticas sencillas.
@@ -206,8 +89,8 @@ Realizar un análisis cuantitativo utilizando exclusivamente el dataset de Kaggl
 \section{Preguntas de investigación específicas (SMART)}
 % -------------------------------------------------
 
-\begin{enumerate}[leftmargin=1.27cm]
-  \item ¿Cuál es la diferencia promedio y la significancia estadística en los precios de la gasolina (\textit{petrol\_usd\_liter}) entre países por nivel de ingreso y grado de subsidios durante 2020--2026, usando únicamente el dataset?
+\begin{enumerate}
+  \item ¿Cuál es la diferencia promedioy la significancia estadística en los precios de la gasolina (\textit{petrol\_usd\_liter}) entre países por nivel de ingreso y grado de subsidios durante 2020--2026, usando únicamente el dataset?
 
   \item ¿Existe menor volatilidad semanal en los precios de gasolina y diésel entre países con alto nivel de subsidios, en comparación con aquellos con bajo nivel de subsidios, en la misma región y período, medida por la desviación estándar o el coeficiente de variación?
 
@@ -232,7 +115,7 @@ Según la descripción oficial del dataset, se trata de una base de datos tabula
 
 \subsection{Variables principales incluidas en el dataset}
 
-\begin{itemize}[leftmargin=1.27cm]
+\begin{itemize}
   \item \textit{date}: fecha de registro semanal (YYYY-MM-DD).
   \item \textit{country}: nombre del país.
   \item \textit{region}: región geográfica (p.\,ej., Asia, Europa, América Latina).
@@ -249,8 +132,8 @@ El dataset se distribuye en Kaggle como un archivo ZIP que contiene archivos CSV
 
 \subsection{Preprocesamiento previsto}
 
-\begin{itemize}[leftmargin=1.27cm]
-  \item Conversión de la columna \textit{date} a tipo fecha y ordenamiento cronológico por país.
+\begin{itemize}
+  \item Conversión de la columna\textit{date} a tipo fecha y ordenamiento cronológico por país.
   \item Verificación de rangos de precios razonables (eliminación de valores negativos o iguales a cero).
   \item Manejo de datos faltantes: imputación simple para brechas cortas y exclusión de series con porcentajes elevados de datos ausentes.
   \item Normalización opcional de variables numéricas en modelos de aprendizaje automático.
@@ -277,7 +160,6 @@ Elaborar visualizaciones comparativas (mapas de calor, gráficos de líneas, box
 % REFERENCIAS
 % -------------------------------------------------
 \nocite{kilian2008}
-\newpage
-\printbibliography[heading=bibintoc, title=Referencias]
+\printbibliography
 
 \end{document}
