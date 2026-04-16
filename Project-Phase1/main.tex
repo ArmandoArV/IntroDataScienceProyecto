@@ -33,7 +33,7 @@
 \professor{Alejandro Cataldo}
 \duedate{Abril 2026}
 
-\abstract{Este trabajo presenta un análisis cuantitativo de los precios minoristas de combustibles a nivel global durante el período 2020--2026, utilizando exclusivamente el dataset de Kaggle ``Global Fuel Prices 2020--2026''. A partir de 27\,468 observaciones semanales de 84 países, se busca caracterizar los niveles y la volatilidad de los precios de gasolina, diésel y GLP, identificar patrones por región, nivel de ingreso y grado de subsidios, y evaluar la transmisión del precio internacional del crudo al consumidor final. El estudio emplea métricas descriptivas, pruebas estadísticas sencillas y modelos predictivos (regresiones lineales y árboles de decisión) para responder a preguntas de investigación específicas. Los resultados pueden aportar evidencia útil para el diseño de políticas energéticas, subsidios focalizados y estrategias de protección de hogares vulnerables frente a shocks de precios.}
+\abstract{En este trabajo queremos entender cómo han cambiado los precios de los combustibles en distintos países del mundo entre 2020 y 2026, usando datos públicos de Kaggle llamados "Global Fuel Prices 2020–2026". Analizaremos más de 27 mil registros semanales de 84 países para ver cómo varían los precios de la gasolina, el diésel y el gas licuado de petróleo (GLP). Nos interesa descubrir patrones según la región, el nivel de ingresos y los subsidios de cada país, y también ver de qué manera el precio internacional del petróleo afecta lo que la gente paga en las estaciones de servicio. Usaremos estadísticas sencillas y modelos predictivos para responder preguntas concretas y, al final, esperamos que los resultados ayuden a crear mejores políticas energéticas y subsidios que protejan a las familias más vulnerables frente a cambios bruscos en los precios.}
 
 \keywords{precios de combustibles, volatilidad, subsidios energéticos, análisis comparativo, datos de Kaggle}
 
@@ -90,7 +90,7 @@ Realizar un análisis cuantitativo utilizando exclusivamente el dataset de Kaggl
 % -------------------------------------------------
 
 \begin{enumerate}
-  \item ¿Cuál es la diferencia promedioy la significancia estadística en los precios de la gasolina (\textit{petrol\_usd\_liter}) entre países por nivel de ingreso y grado de subsidios durante 2020--2026, usando únicamente el dataset?
+  \item ¿Cuál es la diferencia promedio y la significancia estadística en los precios de la gasolina (\textit{petrol\_usd\_liter}) entre países por nivel de ingreso y grado de subsidios durante 2020--2026, usando únicamente el dataset?
 
   \item ¿Existe menor volatilidad semanal en los precios de gasolina y diésel entre países con alto nivel de subsidios, en comparación con aquellos con bajo nivel de subsidios, en la misma región y período, medida por la desviación estándar o el coeficiente de variación?
 
@@ -133,7 +133,7 @@ El dataset se distribuye en Kaggle como un archivo ZIP que contiene archivos CSV
 \subsection{Preprocesamiento previsto}
 
 \begin{itemize}
-  \item Conversión de la columna\textit{date} a tipo fecha y ordenamiento cronológico por país.
+  \item Conversión de la columna \textit{date} a tipo fecha y ordenamiento cronológico por país.
   \item Verificación de rangos de precios razonables (eliminación de valores negativos o iguales a cero).
   \item Manejo de datos faltantes: imputación simple para brechas cortas y exclusión de series con porcentajes elevados de datos ausentes.
   \item Normalización opcional de variables numéricas en modelos de aprendizaje automático.
