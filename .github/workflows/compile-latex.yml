@@ -1,0 +1,42 @@
+name: Compile LaTeX Document
+
+on:
+  push:
+    paths:
+      - 'Project-Phase1/**'
+      - '.github/workflows/compile-latex.yml'
+  pull_request:
+    paths:
+      - 'Project-Phase1/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          working_directory: Project-Phase1
+          latexmk_use_xelatex: false
+          extra_system_packages: |
+            biber
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-pdf
+          path: Project-Phase1/main.pdf
+
+      - name: Commit compiled PDF (push only)
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Project-Phase1/main.pdf
+          git diff --cached --quiet || git commit -m "Auto-compile LaTeX PDF [skip ci]"
+          git push
