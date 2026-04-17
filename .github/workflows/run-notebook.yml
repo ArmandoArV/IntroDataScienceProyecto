@@ -1,0 +1,68 @@
+name: Execute Jupyter Notebook
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build the notebook from'
+        required: true
+        default: 'master'
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          token: ${{ secrets.REPO_PAT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --quiet jupyter nbconvert nbformat ipykernel
+          pip install --quiet kagglehub pandas matplotlib seaborn
+
+      - name: Execute notebook
+        run: |
+          jupyter nbconvert \
+            --to notebook \
+            --execute \
+            --output DataScienceProject_executed.ipynb \
+            DataScienceProject.ipynb
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+
+      - name: Export to HTML
+        run: |
+          jupyter nbconvert \
+            --to html \
+            --output DataScienceProject.html \
+            DataScienceProject_executed.ipynb
+
+      - name: Upload executed notebook
+        uses: actions/upload-artifact@v4
+        with:
+          name: notebook-output
+          path: |
+            DataScienceProject_executed.ipynb
+            DataScienceProject.html
+
+      - name: Commit results to repo
+        if: inputs.branch == 'master'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add DataScienceProject_executed.ipynb DataScienceProject.html
+          git diff --cached --quiet || git commit -m "Auto-execute notebook [skip ci]"
+          git push
