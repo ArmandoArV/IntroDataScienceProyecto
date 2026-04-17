@@ -59,7 +59,7 @@ jobs:
             DataScienceProject.html
 
       - name: Commit results to repo
-        if: inputs.branch == 'master'
+        if: inputs.branch == 'master' && github.actor == 'ArmandoArV'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
