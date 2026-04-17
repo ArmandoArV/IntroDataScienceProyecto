@@ -32,8 +32,8 @@ jobs:
           name: main-pdf
           path: Project-Phase1/main.pdf
 
-      - name: Commit compiled PDF (push only)
-        if: github.event_name == 'push'
+      - name: Commit compiled PDF (push to non-protected branches)
+        if: github.event_name == 'push' && github.ref != 'refs/heads/master'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
