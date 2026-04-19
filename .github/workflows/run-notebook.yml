@@ -8,6 +8,14 @@ on:
         required: true
         default: 'master'
         type: string
+      notebook:
+        description: 'Path to the notebook file'
+        required: true
+        default: 'MainNotebook.ipynb'
+        type: choice
+        options:
+          - MainNotebook.ipynb
+          - Utils/DataScienceProject.ipynb
 
 permissions:
   contents: write
@@ -30,39 +38,45 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --quiet jupyter nbconvert nbformat ipykernel
-          pip install --quiet kagglehub pandas matplotlib seaborn
+          pip install --quiet kagglehub pandas matplotlib seaborn scikit-learn xgboost
 
       - name: Execute notebook
         run: |
+          NOTEBOOK="${{ inputs.notebook }}"
+          DIR=$(dirname "$NOTEBOOK")
+          BASE=$(basename "$NOTEBOOK" .ipynb)
           jupyter nbconvert \
             --to notebook \
             --execute \
-            --output DataScienceProject_executed.ipynb \
-            DataScienceProject.ipynb
+            --output "${BASE}_executed.ipynb" \
+            "$NOTEBOOK"
         env:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
 
       - name: Export to HTML
         run: |
+          NOTEBOOK="${{ inputs.notebook }}"
+          DIR=$(dirname "$NOTEBOOK")
+          BASE=$(basename "$NOTEBOOK" .ipynb)
           jupyter nbconvert \
             --to html \
-            --output DataScienceProject.html \
-            DataScienceProject_executed.ipynb
+            --output "${BASE}.html" \
+            "${DIR}/${BASE}_executed.ipynb"
 
       - name: Upload executed notebook
         uses: actions/upload-artifact@v4
         with:
           name: notebook-output
           path: |
-            DataScienceProject_executed.ipynb
-            DataScienceProject.html
+            **/*_executed.ipynb
+            **/*.html
 
       - name: Commit results to repo
         if: inputs.branch == 'master' && github.actor == 'ArmandoArV'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add DataScienceProject_executed.ipynb DataScienceProject.html
-          git diff --cached --quiet || git commit -m "Auto-execute notebook [skip ci]"
+          git add -A '**/*_executed.ipynb' '**/*.html'
+          git diff --cached --quiet || git commit -m "Auto-execute ${{ inputs.notebook }} [skip ci]"
           git push
