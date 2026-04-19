@@ -1,5 +1,21 @@
 # Python virtual environment
 .venv/
+__pycache__/
+*.pyc
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Kaggle credentials (NEVER commit)
+kaggle.json
+
+# Trained models (regenerable)
+models/*.pkl
+models/*.joblib
+
+# Processed data (regenerable from raw)
+Datasets/processed/*.csv
+Datasets/processed/*.parquet
 
 # LaTeX auxiliary files
 *.aux
