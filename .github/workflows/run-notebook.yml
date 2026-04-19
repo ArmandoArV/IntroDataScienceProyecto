@@ -9,13 +9,10 @@ on:
         default: 'master'
         type: string
       notebook:
-        description: 'Path to the notebook file'
+        description: 'Path to the notebook (e.g. MainNotebook.ipynb, Utils/DataScienceProject.ipynb)'
         required: true
         default: 'MainNotebook.ipynb'
-        type: choice
-        options:
-          - MainNotebook.ipynb
-          - Utils/DataScienceProject.ipynb
+        type: string
 
 permissions:
   contents: write
