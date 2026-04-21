@@ -1,0 +1,65 @@
+name: Render Quarto Article
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to render from'
+        required: true
+        default: 'master'
+        type: string
+      notebook:
+        description: 'Path to the notebook (e.g. MainNotebook.ipynb)'
+        required: true
+        default: 'MainNotebook.ipynb'
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          token: ${{ secrets.REPO_PAT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          pip install --quiet jupyter pandas matplotlib seaborn \
+            great_tables itables kagglehub scikit-learn xgboost
+
+      - name: Install Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Render notebook
+        run: |
+          quarto render "${{ inputs.notebook }}" --to html --execute
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+
+      - name: Upload rendered article
+        uses: actions/upload-artifact@v4
+        with:
+          name: quarto-article
+          path: |
+            **/*.html
+            !.git/**
+
+      - name: Commit rendered article
+        if: inputs.branch == 'master' && github.actor == 'ArmandoArV'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A '*.html'
+          git diff --cached --quiet || git commit -m "Auto-render ${{ inputs.notebook }} with Quarto [skip ci]"
+          git push
