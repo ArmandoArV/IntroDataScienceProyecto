@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --quiet jupyter nbconvert nbformat ipykernel
-          pip install --quiet kagglehub pandas matplotlib seaborn scikit-learn xgboost
+          pip install --quiet kagglehub pandas numpy matplotlib seaborn scipy statsmodels linearmodels
 
       - name: Execute notebook
         run: |
