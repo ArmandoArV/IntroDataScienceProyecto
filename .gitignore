@@ -30,3 +30,14 @@ Datasets/processed/*.parquet
 *.nav
 *.snm
 *.vrb
+
+# Large data files (census CSV, shapefiles)
+*.csv
+*.shp
+*.shx
+*.dbf
+*.sbn
+*.sbx
+*.prj
+*.CPG
+*.shp.xml
