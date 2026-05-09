@@ -8,15 +8,20 @@ on:
       - "_quarto.yml"
       - "requirements.txt"
       - ".github/workflows/publish-quarto.yml"
-  workflow_dispatch:   # allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
 
 permissions:
-  contents: write   # needed to push to gh-pages branch
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -37,15 +42,22 @@ jobs:
           version: "1.9.37"
 
       - name: Render notebook to HTML
-        run: quarto render MainNotebook.ipynb --no-execute --to html
+        run: |
+          quarto render MainNotebook.ipynb --no-execute --to html
+          mv MainNotebook.html index.html
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: .
-          include_files: MainNotebook.html
-          destination_dir: .
-          # Rename to index.html so the root URL serves the notebook directly
-          keep_files: false
+          path: "."
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
