@@ -88,9 +88,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#análisis-global-de-precios-de-combustibles-20202026-evolución-volatilidad-y-factores-explicativos-en-84-paísesautores-armando-arredondo-bastián-hernández-eduardo-albornoz-institución-pontificia-universidad-católica-de-chile-curso-imt-3860-introducción-a-data-science-docente-alejandro-cataldo-este-cuaderno-consolida-el-análisis-completo-del-panel-semanal-de-precios-de-combustibles-para-84-países-20202026.-integra-fuentes-externas-de-energía-y-riesgo-geopolítico-cubre-limpieza-ingeniería-de-variables-análisis-estadístico-modelos-predictivos-y-análisis-de-crisis." id="toc-análisis-global-de-precios-de-combustibles-20202026-evolución-volatilidad-y-factores-explicativos-en-84-paísesautores-armando-arredondo-bastián-hernández-eduardo-albornoz-institución-pontificia-universidad-católica-de-chile-curso-imt-3860-introducción-a-data-science-docente-alejandro-cataldo-este-cuaderno-consolida-el-análisis-completo-del-panel-semanal-de-precios-de-combustibles-para-84-países-20202026.-integra-fuentes-externas-de-energía-y-riesgo-geopolítico-cubre-limpieza-ingeniería-de-variables-análisis-estadístico-modelos-predictivos-y-análisis-de-crisis." class="nav-link active" data-scroll-target="#análisis-global-de-precios-de-combustibles-20202026-evolución-volatilidad-y-factores-explicativos-en-84-paísesautores-armando-arredondo-bastián-hernández-eduardo-albornoz-institución-pontificia-universidad-católica-de-chile-curso-imt-3860-introducción-a-data-science-docente-alejandro-cataldo-este-cuaderno-consolida-el-análisis-completo-del-panel-semanal-de-precios-de-combustibles-para-84-países-20202026.-integra-fuentes-externas-de-energía-y-riesgo-geopolítico-cubre-limpieza-ingeniería-de-variables-análisis-estadístico-modelos-predictivos-y-análisis-de-crisis.">Análisis Global de Precios de Combustibles 2020–2026## Evolución, Volatilidad y Factores Explicativos en 84 Países<strong>Autores:</strong> Armando Arredondo, Bastián Hernández, Eduardo Albornoz <strong>Institución:</strong> Pontificia Universidad Católica de Chile <strong>Curso:</strong> IMT-3860 — Introducción a Data Science <strong>Docente:</strong> Alejandro Cataldo —Este cuaderno consolida el análisis completo del panel semanal de precios de combustibles para 84 países (2020–2026). Integra fuentes externas de energía y riesgo geopolítico, cubre limpieza, ingeniería de variables, análisis estadístico, modelos predictivos y análisis de crisis.</a>
-  <ul class="collapse">
-  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">0. Setup</a>
+  <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup">0. Setup</a>
   <ul class="collapse">
   <li><a href="#ruta-a-los-datos" id="toc-ruta-a-los-datos" class="nav-link" data-scroll-target="#ruta-a-los-datos">0.1 Ruta a los datos</a></li>
   <li><a href="#instalación-de-dependencias" id="toc-instalación-de-dependencias" class="nav-link" data-scroll-target="#instalación-de-dependencias">0.2 Instalación de dependencias</a></li>
@@ -147,7 +145,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#limitaciones" id="toc-limitaciones" class="nav-link" data-scroll-target="#limitaciones">Limitaciones</a></li>
   <li><a href="#referencias" id="toc-referencias" class="nav-link" data-scroll-target="#referencias">Referencias</a></li>
   </ul></li>
-  </ul></li>
   </ul>
 </nav>
 </div>
@@ -157,11 +154,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p><a href="https://colab.research.google.com/github/ArmandoArV/IntroDataScienceProyecto/blob/master/MainNotebook.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a></p>
-<div style="text-align:center; margin-bottom:16px;">
+<div style="text-align:center; margin-bottom:20px;">
 <img src="Assets/Logo.png" height="110" alt="Pontificia Universidad Católica de Chile">
 </div>
-<section id="análisis-global-de-precios-de-combustibles-20202026-evolución-volatilidad-y-factores-explicativos-en-84-paísesautores-armando-arredondo-bastián-hernández-eduardo-albornoz-institución-pontificia-universidad-católica-de-chile-curso-imt-3860-introducción-a-data-science-docente-alejandro-cataldo-este-cuaderno-consolida-el-análisis-completo-del-panel-semanal-de-precios-de-combustibles-para-84-países-20202026.-integra-fuentes-externas-de-energía-y-riesgo-geopolítico-cubre-limpieza-ingeniería-de-variables-análisis-estadístico-modelos-predictivos-y-análisis-de-crisis." class="level1">
-<h1>Análisis Global de Precios de Combustibles 2020–2026## Evolución, Volatilidad y Factores Explicativos en 84 Países<strong>Autores:</strong> Armando Arredondo, Bastián Hernández, Eduardo Albornoz <strong>Institución:</strong> Pontificia Universidad Católica de Chile <strong>Curso:</strong> IMT-3860 — Introducción a Data Science <strong>Docente:</strong> Alejandro Cataldo —Este cuaderno consolida el análisis completo del panel semanal de precios de combustibles para 84 países (2020–2026). Integra fuentes externas de energía y riesgo geopolítico, cubre limpieza, ingeniería de variables, análisis estadístico, modelos predictivos y análisis de crisis.</h1>
+<h1 style="margin-top:0;">
+Análisis Global de Precios de Combustibles 2020–2026
+</h1>
+<h3 style="font-weight:normal; margin-top:-8px;" class="anchored">
+Evolución, Volatilidad y Factores Explicativos en 84 Países
+</h3>
+<p>
+<strong>Autores:</strong> Armando Arredondo, Bastián Hernández, Eduardo Albornoz<br> <strong>Institución:</strong> Pontificia Universidad Católica de Chile<br> <strong>Curso:</strong> IMT-3860 — Introducción a Data Science<br> <strong>Docente:</strong> Alejandro Cataldo
+</p>
+<hr>
+<p>
+Este cuaderno consolida el análisis completo del panel semanal de precios de combustiblespara 84 países (2020–2026). Integra fuentes externas de energía y riesgo geopolítico,cubre limpieza, ingeniería de variables, análisis estadístico, modelos predictivos y análisis de crisis.
+</p>
 <section id="setup" class="level2">
 <h2 class="anchored" data-anchor-id="setup">0. Setup</h2>
 <section id="ruta-a-los-datos" class="level3">
@@ -3774,7 +3782,6 @@ Chile exhibe un pass-through relativamente alto y una volatilidad moderada en co
 </li>
 <li>Mork, K. A. (1989) — Oil and the Macroeconomy When Prices Go Up and Down</li>
 </ul>
-</section>
 </section>
 </section>
 
