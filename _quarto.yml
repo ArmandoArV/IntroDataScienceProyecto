@@ -8,7 +8,7 @@ format:
     toc-depth: 3
     code-fold: true
     code-tools: true
-    self-contained: true
+    self-contained: false
     fig-width: 10
     fig-height: 6
     include-in-header:
