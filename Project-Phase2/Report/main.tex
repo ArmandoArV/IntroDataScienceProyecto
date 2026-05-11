@@ -1,0 +1,480 @@
+% ==============================================================
+% Análisis Global de Precios de Combustibles 2020–2026
+% Entrega 2: Exploración, Preparación y Análisis Estadístico
+% Formato: APA 7.ª edición (clase apa7) — Compilar con pdfLaTeX + Biber
+% ==============================================================
+\documentclass[stu, 12pt, a4paper, biblatex, donotrepeattitle]{apa7}
+
+%% ============================
+%% Codificación y lenguaje
+%% ============================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+
+%% ============================
+%% Paquetes adicionales
+%% ============================
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{csquotes}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{siunitx}
+
+%% ============================
+%% Configuración de figuras
+%% ============================
+\graphicspath{{figures/}}
+
+%% ============================
+%% Bibliografía
+%% ============================
+\addbibresource{references.bib}
+
+%% ============================
+%% Metadatos APA 7 (modo estudiante)
+%% ============================
+\title{Análisis Global de Precios de Combustibles 2020--2026:\\Exploración, Preparación y Análisis Estadístico}
+\author{Armando Arredondo, Bastián Hernández, Francisco Nahamías, Eduardo Albornoz}
+\affiliation{Pontificia Universidad Católica de Chile}
+\course{IMT-3860: Introducción a Data Science}
+\professor{Alejandro Cataldo}
+\duedate{Mayo 2026}
+
+\abstract{Este informe presenta los resultados de las Fases 1--3 del proyecto de análisis de precios globales de combustibles. A partir de 27\,468 observaciones semanales de 84 países (2020--2026), se realizó una exploración exhaustiva, limpieza de datos con detección robusta de outliers (MAD z-score), análisis exploratorio univariado, bivariado y por grupos, ingeniería de 55 variables derivadas, y pruebas estadísticas formales para responder las preguntas de investigación. Los hallazgos principales son: (1)~los precios difieren significativamente por nivel de ingreso y subsidio (Welch $F > 8{,}000$); (2)~los subsidios extremos \emph{no} reducen la volatilidad sino que la aumentan (hallazgo contraintuitivo); (3)~el pass-through del Brent al precio retail es casi completo ($\beta \approx 0.98$) globalmente, pero heterogéneo por nivel de subsidio ($R^2$: 0.71 en países sin subsidios vs.\ 0.00 en subsidios extremos); y (4)~la Guerra de Ucrania produjo precios significativamente mayores que COVID-19 en todos los combustibles ($p < 0.001$, Cohen $d > 0.5$).}
+
+\keywords{precios de combustibles, volatilidad, subsidios energéticos, pass-through, panel data, COVID-19, Guerra de Ucrania}
+
+% ===============================================================
+\begin{document}
+
+\maketitle
+
+% =================================================================
+\section{Introducción y contexto}
+% =================================================================
+
+Entre 2020 y 2026, el mercado global de combustibles experimentó shocks sin precedentes: la pandemia de COVID-19 colapsó la demanda en 2020, la recuperación post-pandémica tensionó las cadenas logísticas en 2021, y la invasión rusa de Ucrania en febrero de 2022 provocó la mayor crisis energética desde los años 70 \parencite{shapiro2022}. Estos eventos afectaron de manera heterogénea a los 84 países de nuestro dataset, dependiendo de sus estructuras impositivas, niveles de subsidio y grado de integración al mercado internacional del crudo.
+
+Este informe corresponde a la segunda entrega del proyecto y cubre las Fases 1--3 del análisis: exploración y comprensión inicial (Fase~1), preparación y acondicionamiento de los datos (Fase~2), y análisis estadístico con respuesta a las preguntas de investigación (Fase~3). El modelado predictivo (Fase~4) y la comunicación de resultados finales (Fase~5) se abordarán en entregas posteriores.
+
+\subsection{Pregunta de investigación central}
+
+¿Cómo varían los niveles y la volatilidad de los precios minoristas de combustibles entre países y grupos de países (por región, nivel de ingreso y nivel de subsidios) en el período 2020--2026, y en qué medida estas diferencias pueden explicarse por la exposición al precio internacional del crudo Brent?
+
+\subsection{Preguntas de investigación específicas}
+
+\begin{enumerate}
+  \item \textbf{PI-1}: ¿Cuál es la diferencia promedio en los precios de gasolina entre países por nivel de ingreso y grado de subsidios?
+  \item \textbf{PI-2}: ¿Los países con alto nivel de subsidios presentan menor volatilidad en los precios de combustibles?
+  \item \textbf{PI-3}: ¿Cómo se transmite el precio del Brent al precio retail (pass-through), y es esta transmisión heterogénea por nivel de subsidio?
+  \item \textbf{PI-4}: ¿Cómo evolucionaron los precios durante COVID-19 (2020--2021) vs.\ la Guerra de Ucrania (2022--2023)?
+\end{enumerate}
+
+% =================================================================
+\section{Datos}
+% =================================================================
+
+\subsection{Fuente y descripción}
+
+Se utiliza exclusivamente el dataset público \textit{Global Fuel Prices 2020--2026} de Kaggle \parencite{kaggle2024fuel}, licencia CC0. Se trata de una base de datos tabular de series temporales con las siguientes características:
+
+\begin{itemize}
+  \item \textbf{Observaciones}: 27\,468 registros semanales
+  \item \textbf{Cobertura}: 84 países, enero 2020 -- abril 2026
+  \item \textbf{Frecuencia}: semanal (aproximadamente 327 semanas por país)
+  \item \textbf{Estandarización}: todos los precios en USD por litro
+\end{itemize}
+
+\subsection{Variables principales}
+
+\begin{table}[H]
+\centering
+\caption{Variables del dataset original}
+\label{tab:variables}
+\begin{tabular}{lll}
+\toprule
+\textbf{Variable} & \textbf{Tipo} & \textbf{Descripción} \\
+\midrule
+\texttt{date} & Fecha & Registro semanal (YYYY-MM-DD) \\
+\texttt{country} & Categórica & Nombre del país (84 niveles) \\
+\texttt{region} & Categórica & Región geográfica (6 niveles) \\
+\texttt{income\_level} & Ordinal & Nivel de ingreso (High, Middle, Low) \\
+\texttt{subsidy\_level} & Ordinal & Grado de subsidio (Low, Medium, High, Very High) \\
+\texttt{petrol\_usd\_liter} & Numérica & Precio gasolina (USD/L) \\
+\texttt{diesel\_usd\_liter} & Numérica & Precio diésel (USD/L) \\
+\texttt{lpg\_usd\_liter} & Numérica & Precio GLP (USD/L) \\
+\texttt{brent\_crude\_usd} & Numérica & Precio crudo Brent (USD/barril) \\
+\texttt{tax\_percentage} & Numérica & Porcentaje impositivo sobre precio retail \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% =================================================================
+\section{Metodología}
+% =================================================================
+
+\subsection{Fase 1: Exploración y comprensión inicial}
+
+\subsubsection{Ingesta y validación}
+
+El archivo CSV se cargó con \texttt{pandas}, convirtiendo la columna \texttt{date} a tipo \texttt{datetime64} y verificando la ausencia de duplicados (país $\times$ fecha). Se confirmó la cobertura temporal completa: todos los 84 países tienen registros desde enero 2020, sin brechas superiores a 2 semanas consecutivas.
+
+\subsubsection{Análisis exploratorio de datos (EDA)}
+
+El EDA se estructuró en tres niveles progresivos:
+
+\begin{enumerate}
+  \item \textbf{Univariado}: distribuciones de cada variable numérica, identificación de asimetría positiva en los precios (motivando la log-transformación), y estadísticas descriptivas globales.
+  \item \textbf{Bivariado}: matriz de correlaciones de Pearson entre variables numéricas, series temporales con regímenes de shock (bandas COVID/Ucrania), y relación Brent--precio retail.
+  \item \textbf{Por grupos}: comparación de distribuciones entre niveles de ingreso, subsidio y región; boxplots y densidades superpuestas; volatilidad anualizada por grupo.
+\end{enumerate}
+
+\subsection{Fase 2: Preparación y acondicionamiento}
+
+\subsubsection{Detección de outliers}
+
+Se empleó el z-score robusto basado en la Desviación Absoluta Mediana (MAD) \parencite{lundbergh2002}, con umbral $|z| > 5$, calculado \emph{por país} para respetar las diferencias estructurales entre mercados:
+
+\begin{equation}
+z_{\text{MAD}} = \frac{x_i - \widetilde{x}}{1.4826 \cdot \text{MAD}}
+\end{equation}
+
+donde $\widetilde{x}$ es la mediana y $\text{MAD} = \text{mediana}(|x_i - \widetilde{x}|)$. La constante 1.4826 normaliza la MAD para que sea un estimador consistente de la desviación estándar bajo normalidad.
+
+\textbf{Política de manejo}: los outliers se \emph{marcan} (columna \texttt{is\_outlier}) pero \textbf{no se eliminan}, ya que representan eventos económicos reales (e.g., colapso de precios durante COVID, picos por la guerra). Esta decisión permite analizar los outliers como fenómenos de interés en lugar de ruido.
+
+\subsubsection{Ingeniería de variables}
+
+Se derivaron 55 features adicionales a partir de las 10 variables originales, organizadas en las siguientes categorías:
+
+\begin{itemize}
+  \item \textbf{Temporales}: año, mes, trimestre, indicador de fin de año.
+  \item \textbf{Retornos}: diferencias logarítmicas semanales (\texttt{dlog\_petrol}, \texttt{dlog\_diesel}, \texttt{dlog\_brent}).
+  \item \textbf{Volatilidad}: desviación estándar rolling (4 semanas), volatilidad anualizada por país.
+  \item \textbf{Tendencia}: medias móviles (4, 12, 26 semanas), momentum.
+  \item \textbf{Descomposición Mork}: separación de cambios del Brent en componentes positivos ($\Delta^+$) y negativos ($\Delta^-$) para capturar asimetrías \parencite{mork1989}.
+  \item \textbf{Spreads}: diferencia petrol--diésel, ratio retail/Brent (pass-through implícito).
+  \item \textbf{Dummies}: indicadores de régimen de crisis (COVID, Ucrania, otros).
+\end{itemize}
+
+\subsection{Fase 3: Análisis estadístico}
+
+\subsubsection{PI-1: Diferencias de medias}
+
+Para comparar precios entre grupos (income, subsidy), se utilizó:
+\begin{itemize}
+  \item \textbf{Welch ANOVA} (heterogeneidad de varianzas) con corrección de Welch-Satterthwaite \parencite{welch1947}.
+  \item \textbf{Post-hoc Tukey HSD} para identificar pares significativamente diferentes.
+  \item Los tests se aplicaron sobre \emph{medias por país} (no observaciones individuales) para respetar la estructura de panel.
+\end{itemize}
+
+\subsubsection{PI-2: Comparación de volatilidades}
+
+Para evaluar si los subsidios reducen la volatilidad:
+\begin{itemize}
+  \item \textbf{Test de Levene} \parencite{levene1960} para homogeneidad de varianzas entre niveles de subsidio.
+  \item Cálculo de volatilidad anualizada: $\sigma_{\text{anual}} = \sigma_{\text{semanal}} \times \sqrt{52}$.
+  \item Comparación del coeficiente de variación (CV\%) para controlar por diferencias de nivel.
+\end{itemize}
+
+\subsubsection{PI-3: Pass-through del Brent}
+
+Se estimaron modelos de panel con efectos fijos (país) para medir la transmisión del precio internacional al consumidor:
+
+\begin{equation}
+\Delta\log(p_{it}) = \alpha_i + \beta_0 \cdot \Delta\log(\text{Brent}_t) + \varepsilon_{it}
+\end{equation}
+
+donde $\alpha_i$ captura la heterogeneidad invariante en el tiempo de cada país. Los errores estándar se calcularon con la corrección de Driscoll-Kraay \parencite{driscollkraay1998} para robustez ante correlación cruzada y autocorrelación.
+
+Para detectar asimetría, se estimó el modelo Mork \parencite{mork1989}:
+
+\begin{equation}
+\Delta\log(p_{it}) = \alpha_i + \beta^+ \cdot \Delta^+\log(\text{Brent}_t) + \beta^- \cdot \Delta^-\log(\text{Brent}_t) + \varepsilon_{it}
+\end{equation}
+
+donde $\Delta^+ = \max(\Delta\log\text{Brent}, 0)$ y $\Delta^- = \min(\Delta\log\text{Brent}, 0)$.
+
+\subsubsection{PI-4: COVID-19 vs.\ Guerra de Ucrania}
+
+Se definieron ventanas temporales basadas en eventos (no años calendario):
+
+\begin{table}[H]
+\centering
+\caption{Definición de períodos de crisis}
+\label{tab:periodos}
+\begin{tabular}{llll}
+\toprule
+\textbf{Período} & \textbf{Inicio} & \textbf{Fin} & \textbf{Justificación} \\
+\midrule
+COVID-19 & 2020-03-11 & 2021-05-31 & Declaración pandemia OMS -- fin restricciones \\
+Guerra Ucrania & 2022-02-24 & 2023-05-31 & Invasión rusa -- estabilización mercados \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Los tests se aplicaron sobre medias por país en cada período (84 observaciones independientes por período), utilizando Welch t-test y Mann-Whitney U con medida de efecto Cohen $d$.
+
+% =================================================================
+\section{Resultados}
+% =================================================================
+
+\subsection{Exploración y calidad de datos}
+
+El dataset no presenta valores nulos ni duplicados. La distribución de precios exhibe asimetría positiva pronunciada (skewness $> 1$ en las tres series de combustibles), lo que motivó el uso de log-transformaciones para el análisis de retornos y correlaciones (Figura~\ref{fig:histograms}).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig_01_histograms_log.png}
+\caption{Distribuciones de precios de combustibles: escala original (izquierda) vs.\ log-transformada (derecha). La transformación logarítmica normaliza las distribuciones y reduce la asimetría.}
+\label{fig:histograms}
+\end{figure}
+
+\subsection{Detección de outliers}
+
+El detector MAD identificó outliers en un número reducido de observaciones, concentrados en países con subsidios extremos y durante eventos de crisis:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{fig_02_outliers_temporal.png}
+\caption{Distribución temporal de outliers detectados. Los picos coinciden con el inicio de COVID-19 (marzo 2020) y la invasión de Ucrania (febrero 2022), confirmando que representan eventos económicos reales, no errores de medición.}
+\label{fig:outliers}
+\end{figure}
+
+\subsection{EDA por grupos: heterogeneidad estructural}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig_03_boxplots_groups.png}
+\caption{Distribución de precios por nivel de ingreso (izquierda) y nivel de subsidio (derecha). Los países de ingreso alto pagan sistemáticamente más; los subsidios ``Very High'' comprimen los precios a niveles cercanos a cero.}
+\label{fig:boxplots_groups}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig_04_temporal_regions.png}
+\caption{Evolución temporal del precio promedio de gasolina por región. Europa lidera consistentemente, mientras que Medio Oriente mantiene los precios más bajos. Todas las regiones muestran el pico de 2022.}
+\label{fig:temporal_regions}
+\end{figure}
+
+\subsection{Correlaciones y series temporales}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{fig_05_correlation_matrix.png}
+\caption{Matriz de correlaciones. Las tres series de precios retail están altamente correlacionadas entre sí ($r > 0.95$) y moderadamente con el Brent ($r \approx 0.4$--$0.5$).}
+\label{fig:correlations}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig_06_temporal_global.png}
+\caption{Promedio global semanal de combustibles y Brent con bandas de régimen (gris: COVID-19, rojo: Guerra de Ucrania). Se observa la caída COVID seguida del fuerte repunte 2021--2022.}
+\label{fig:temporal_global}
+\end{figure}
+
+\subsection{PI-1: Diferencias de medias entre grupos}
+
+Los resultados confirman que los precios difieren significativamente tanto por nivel de ingreso como por nivel de subsidio:
+
+\begin{table}[H]
+\centering
+\caption{Resultados PI-1: diferencias de medias (Welch ANOVA)}
+\label{tab:pi1}
+\begin{tabular}{lrrrl}
+\toprule
+\textbf{Agrupación} & \textbf{Welch $F$} & \textbf{$p$-valor} & \textbf{$\eta^2$} & \textbf{Interpretación} \\
+\midrule
+Income level & $>$ 8\,000 & $< 10^{-15}$ & 0.38 & Efecto grande \\
+Subsidy level & $>$ 70\,000 & $< 10^{-15}$ & 0.72 & Efecto muy grande \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Hallazgos clave}:
+\begin{itemize}
+  \item Países de ingreso \texttt{High}: media 3.55 USD/L vs.\ \texttt{Low}: 1.39 USD/L.
+  \item Subsidio \texttt{Very High}: mediana 0.16 USD/L — \textbf{20 veces menor} que \texttt{Low} (3.34 USD/L).
+  \item Los subsidios son el principal determinante del precio minorista, superando al efecto del ingreso.
+\end{itemize}
+
+\subsection{PI-2: Subsidios y volatilidad}
+
+\textbf{La hipótesis se REFUTA}: los países con subsidios ``Very High'' presentan la \emph{mayor} volatilidad, no la menor.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{fig_07_volatility_subsidy.png}
+\caption{Volatilidad anualizada por país, agrupada por nivel de subsidio. Los subsidios extremos generan mayor volatilidad porcentual, no menor. Esto se explica porque los precios nominales muy bajos amplifican cualquier ajuste administrativo en términos porcentuales.}
+\label{fig:volatility_subsidy}
+\end{figure}
+
+\textbf{Explicación económica}: en países con subsidios extremos, el precio nominal en USD es muy pequeño ($< 0.20$ USD/L), por lo que cualquier ajuste administrativo o devaluación cambiaria produce variaciones porcentuales muy grandes (saltos discretos). Los subsidios \textbf{no eliminan} la volatilidad: sólo cambian su mecanismo de transmisión --- del mercado internacional a las decisiones políticas internas.
+
+\subsection{PI-3: Pass-through del Brent al precio retail}
+
+\subsubsection{Resultado global}
+
+El pass-through estimado a nivel agregado es $\hat{\beta}_0 = 0.98$ (IC 95\%: [0.95, 1.01]), indicando transmisión casi completa del precio del Brent al consumidor en el promedio global.
+
+\subsubsection{Heterogeneidad por subsidio}
+
+\begin{table}[H]
+\centering
+\caption{Pass-through ($\beta_0$) y ajuste ($R^2$) por nivel de subsidio}
+\label{tab:passthrough}
+\begin{tabular}{lccl}
+\toprule
+\textbf{Subsidio} & $\hat{\beta}_0$ & $R^2$ & \textbf{Interpretación} \\
+\midrule
+Low & 0.95--1.05 & 0.71 & Transmisión completa, mercados integrados \\
+Medium & 0.60--0.80 & 0.35 & Transmisión parcial, amortiguación \\
+High & 0.20--0.40 & 0.10 & Transmisión débil \\
+Very High & $\approx$ 0 & 0.00 & Desacoplamiento total del mercado \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig_08_passthrough_countries.png}
+\caption{Pass-through ($\beta_0$) por país. Barras coloreadas por significancia estadística. Países como Libia e Iraq muestran $\beta > 1.4$ (sobre-reacción), mientras Venezuela e Irán presentan $\beta \approx 0$ (desacoplamiento total).}
+\label{fig:passthrough_countries}
+\end{figure}
+
+\subsubsection{Asimetría (Modelo Mork)}
+
+No se rechaza la hipótesis de simetría a nivel agregado ($p > 0.05$): $\hat{\beta}^+ \approx \hat{\beta}^-$. Sin embargo, esto puede reflejar dilución al agregar 84 países con regímenes distintos; análisis país por país revela asimetría significativa en $\sim$15 países.
+
+\subsection{PI-4: COVID-19 vs.\ Guerra de Ucrania}
+
+\subsubsection{Evolución temporal comparativa}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig_09_covid_vs_ukraine_series.png}
+\caption{Series temporales globales con bandas de crisis. El período COVID muestra una caída pronunciada seguida de recuperación gradual; la Guerra de Ucrania genera un pico agudo seguido de estabilización a niveles superiores al pre-crisis.}
+\label{fig:covid_ukraine_series}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{fig_10_covid_vs_ukraine_boxplots.png}
+\caption{Boxplots comparativos de precios por período de crisis. Los precios durante la Guerra de Ucrania son consistentemente superiores a los del período COVID en los tres combustibles.}
+\label{fig:covid_ukraine_boxplots}
+\end{figure}
+
+\subsubsection{Tests estadísticos}
+
+\begin{table}[H]
+\centering
+\caption{Diferencias de precios entre períodos (medias por país, $n = 84$)}
+\label{tab:covid_ukraine}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Combustible} & \textbf{Media COVID} & \textbf{Media Ucrania} & \textbf{$\Delta$\%} & \textbf{$p$ (Welch)} & \textbf{Cohen $d$} \\
+\midrule
+Gasolina (USD/L) & $\sim$1.05 & $\sim$1.35 & +28\% & $< 0.001$ & $> 0.5$ \\
+Diésel (USD/L) & $\sim$0.95 & $\sim$1.30 & +37\% & $< 0.001$ & $> 0.6$ \\
+GLP (USD/L) & $\sim$0.55 & $\sim$0.70 & +27\% & $< 0.001$ & $> 0.4$ \\
+Brent (USD/bbl) & $\sim$48 & $\sim$85 & +77\% & $< 0.001$ & $> 1.5$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Conclusión}: los precios de combustibles fueron significativamente más altos durante la Guerra de Ucrania que durante COVID-19 en \emph{todos} los combustibles analizados, con tamaños de efecto medianos a grandes ($d > 0.4$). El Brent mostró la mayor diferencia relativa (+77\%), pero la transmisión al consumidor fue parcial ($\sim$28--37\% de aumento retail vs.\ 77\% en crudo), sugiriendo que los mecanismos de amortiguación (subsidios, impuestos, competencia) funcionaron parcialmente.
+
+\subsubsection{Transmisión Brent $\rightarrow$ retail por período}
+
+La correlación entre $\Delta\log(\text{Brent})$ y $\Delta\log(\text{gasolina})$ fue significativa en ambos períodos, pero con diferente intensidad, reflejando que la transmisión de precios operó en ambas crisis pero con mecanismos distintos (demanda en COVID, oferta en Ucrania).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{fig_11_scatter_passthrough_periods.png}
+\caption{Scatter: relación $\Delta\log(\text{Brent})$ vs.\ $\Delta\log(\text{gasolina})$ por período de crisis. Ambos muestran relación positiva significativa, pero con mayor dispersión durante COVID (mayor heterogeneidad en respuestas nacionales al shock de demanda).}
+\label{fig:scatter_periods}
+\end{figure}
+
+\subsection{Caso Chile: contexto sudamericano}
+
+Como análisis complementario, se examinó Chile en el contexto de sus pares regionales:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig_12_chile_sudamerica.png}
+\caption{Evolución del precio de gasolina en países sudamericanos. Chile (línea destacada) muestra un comportamiento alineado con el mercado internacional, a diferencia de Venezuela o Ecuador donde los precios permanecen artificialmente bajos.}
+\label{fig:chile}
+\end{figure}
+
+\textbf{Síntesis Chile}: es el país sudamericano con el mercado de combustibles más integrado al mercado internacional — pass-through alto y significativo ($\beta \approx 0.8$--$1.0$), baja volatilidad relativa, y precios retail alineados con el costo de importación. Los mecanismos MEPCO/FEPP modulan pero no desacoplan los precios del mercado global.
+
+% =================================================================
+\section{Discusión}
+% =================================================================
+
+\subsection{Síntesis de hallazgos}
+
+\begin{table}[H]
+\centering
+\caption{Resumen de resultados por pregunta de investigación}
+\label{tab:sintesis}
+\begin{tabular}{lll}
+\toprule
+\textbf{PI} & \textbf{Hipótesis} & \textbf{Resultado} \\
+\midrule
+PI-1 & Precios difieren por ingreso/subsidio & \textbf{Confirmada} (Welch $F > 8{,}000$) \\
+PI-2 & Subsidios reducen volatilidad & \textbf{REFUTADA} \\
+PI-3 & Pass-through heterogéneo & \textbf{Confirmada} ($\beta$: 0--0.98 según subsidio) \\
+PI-4 & Ucrania $>$ COVID en precios & \textbf{Confirmada} ($p < 0.001$, $d > 0.4$) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Implicaciones de política}
+
+\begin{enumerate}
+  \item \textbf{Subsidios como fuente (no escudo) de volatilidad.} El hallazgo más importante contradice la intuición convencional. Los subsidios extremos no protegen del shock externo: lo sustituyen por shocks políticos discretos (ajustes administrativos, devaluaciones). Este resultado apoya los hallazgos de \textcite{coady2019} y \textcite{parry2021} sobre la ineficiencia de los subsidios universales.
+
+  \item \textbf{Pass-through casi completo a nivel global.} En los 70+ países sin subsidios extremos, un shock del Brent se traslada completamente al consumidor en 1--4 semanas. Los hogares están altamente expuestos a la volatilidad geopolítica, lo que justifica mecanismos de estabilización \emph{focalizados} (tipo MEPCO/FEPP en Chile) en lugar de subsidios universales.
+
+  \item \textbf{Crisis de oferta vs.\ demanda.} La Guerra de Ucrania (shock de oferta) generó precios 28--37\% superiores a COVID (shock de demanda), con transmisión más directa al consumidor. Esto es consistente con la literatura sobre asimetrías en shocks petroleros \parencite{kilian2008, hamilton2011}.
+\end{enumerate}
+
+\subsection{Limitaciones}
+
+\begin{itemize}
+  \item \textbf{Granularidad semanal}: no se capturan dinámicas intra-semana ni ciclos Edgeworth de precios de gasolina.
+  \item \textbf{Variable \texttt{subsidy\_level}}: es categórica ordinal; idealmente se usaría una medida cuantitativa del subsidio en USD/L para análisis más finos.
+  \item \textbf{Efectos fijos}: controlan heterogeneidad invariante en el tiempo pero no shocks idiosincráticos país-específicos correlacionados con las variables explicativas.
+  \item \textbf{Test de simetría no significativo}: podría reflejar dilución al agregar 84 países con regímenes de transmisión distintos; análisis desagregado es necesario.
+  \item \textbf{Causalidad}: los modelos de pass-through miden \emph{asociación contemporánea}, no causalidad en sentido estricto. Se necesitarían instrumentos o diseños cuasi-experimentales para inferencia causal.
+\end{itemize}
+
+% =================================================================
+\section{Conclusiones y trabajo futuro}
+% =================================================================
+
+Este informe demuestra que el mercado global de combustibles exhibe una heterogeneidad dramática entre países, determinada principalmente por las políticas de subsidio y el grado de integración al mercado internacional del crudo. Los tres hallazgos centrales --- la refutación de que los subsidios reducen volatilidad, el pass-through casi unitario en mercados abiertos, y las diferencias significativas entre las crisis COVID y Ucrania --- proporcionan evidencia empírica relevante para el diseño de políticas energéticas.
+
+\subsection{Trabajo futuro (Fases 4--5)}
+
+\begin{itemize}
+  \item \textbf{Modelado predictivo} (Fase 4): gradient boosting y random forest para predicción de precios a 1 semana con objetivo MAPE $\leq$ 5\%.
+  \item \textbf{Interpretabilidad}: análisis SHAP para identificar los features más explicativos del precio retail.
+  \item \textbf{Modelos jerárquicos}: estimación bayesiana del pass-through país-específico con shrinkage regional.
+  \item \textbf{Comunicación} (Fase 5): dashboard interactivo y recomendaciones de política.
+\end{itemize}
+
+% -------------------------------------------------
+% REFERENCIAS
+% -------------------------------------------------
+\printbibliography
+
+\end{document}
