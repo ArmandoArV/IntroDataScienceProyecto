@@ -1,0 +1,6 @@
+# Exclude notebooks that are not part of the published output
+scratchpad.ipynb
+Project-Phase2/
+Talleres/
+Assets/
+.venv/

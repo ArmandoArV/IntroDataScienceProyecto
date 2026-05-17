@@ -1,0 +1,22 @@
+project:
+  type: default
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    code-tools: true
+    self-contained: false
+    fig-width: 10
+    fig-height: 6
+    include-in-header:
+      text: |
+        <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+
+execute:
+  enabled: false   # use pre-executed notebook outputs; no dataset re-execution in CI
+  freeze: auto
+
+jupyter: python3

@@ -41,3 +41,6 @@ Datasets/processed/*.parquet
 *.prj
 *.CPG
 *.shp.xml
+
+/.quarto/
+**/*.quarto_ipynb
